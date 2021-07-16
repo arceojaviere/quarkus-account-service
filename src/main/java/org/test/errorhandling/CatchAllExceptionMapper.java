@@ -1,22 +1,33 @@
 package org.test.errorhandling;
  
 import javax.enterprise.context.ApplicationScoped;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+
+import org.test.errorhandling.dto.Status;
+import org.test.errorhandling.dto.StatusBean;
  
 @ApplicationScoped
 @Provider
 public class CatchAllExceptionMapper implements ExceptionMapper<Throwable> 
 {
+
+    private Jsonb marshaller = JsonbBuilder.create();
+
     @Override
     public Response toResponse(Throwable exception) 
     {
-        String template = "{\"status\": \"error\", \"error\": \"unknown\", \"exceptionType\": \"%s\", \"message\": \"%s\"";
+        StatusBean status = new StatusBean();
+        status.setStatus(Status.ERROR);
+        status.setDescription("Unknown Error");
+        status.setExceptionType(exception.getClass().getName().toString());
+        status.setMessage(exception.getMessage());
 
-        return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
-            String.format(template, exception.getClass().getName().toString(), exception.getMessage())).build();  
+
+        return Response.status(javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR).entity(this.marshaller.toJson(status)).build();  
 
     }
 }
