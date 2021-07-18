@@ -10,6 +10,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -83,6 +84,48 @@ public class AccountResource {
         }
 
         return accounts;
+    }
+
+
+    @Operation(
+        description = "Get the account wih the specified user ID"
+    )
+    @APIResponses(
+        value = {
+            @APIResponse(responseCode = "200",
+                    description = "The account matching the povided User ID, or an empty document if nothing matches",
+                    content = @Content(schema = @Schema(implementation = Account.class))
+                    ),
+            @APIResponse(
+                responseCode = "500",
+                description = "An unknown error occurred"
+            ),
+            @APIResponse(
+                responseCode = "400",
+                description = "The request could not be processed because of the specified inputs. The cause could be a validation issue or other problem with the data"
+            )
+            
+        }
+    )
+    @GET
+    @Path("/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Account getAccountByUserId( @Parameter(
+                description = "The User ID of the account to be recovered", required = true 
+            ) @PathParam("userId") String userId,
+            @Parameter(
+                description = "A parameter indicating wheter the details of the person associated with the account should be queried or not",
+                required = false
+            ) @QueryParam("queryPersonDetails") @DefaultValue("false") boolean queryPersonDetails) {
+                
+        Account account = this.repository.findByUserId(userId);
+
+        if(queryPersonDetails){
+
+            account.setPerson(this.personServiceClient.getPersonById(account.getPerson().getId()));
+        }
+
+        return account;
     }
 
 

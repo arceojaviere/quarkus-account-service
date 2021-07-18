@@ -14,8 +14,8 @@ public class AccountRepository implements PanacheRepository<Account>{
         return this.findAll().list();
     }
 
-    public Account findByUsername(String username){
-        return this.find("username", username).firstResult();
+    public Account findByUserId(String userId){
+        return this.find("userId", userId).firstResult();
     }
     @Transactional
     public Account persistAndReturn(Account account){

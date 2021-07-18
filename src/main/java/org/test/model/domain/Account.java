@@ -4,9 +4,13 @@ import javax.json.bind.annotation.JsonbProperty;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
@@ -16,9 +20,11 @@ public class Account extends PanacheEntityBase{
     // Changing the property name when marshalling/unmarshalling to/from JSON
     @JsonbProperty("accountId")
     @Id
+    @GenericGenerator(name = "datePlusSequence", strategy = "org.test.generator.DatePlusSequenceGenerator", parameters = {@Parameter(name="sequence", value="account_sequence")})
+    @GeneratedValue(generator = "datePlusSequence")  
     private String id;
     
-    @Column(name = "user_id")
+    @Column(name = "user_id", unique = true)
     @NotBlank(message = "The user ID is required for the Account")
     private String userId;
     private String password;
